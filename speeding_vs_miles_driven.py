@@ -104,7 +104,6 @@ def load_court_cases(path, traffic_by_court):
                         #court['limits'][speed_limit].append(speed_actual)
                         court['chargeCount'] += 1
                         break
-        break
 
 def get_speeding_violation(charge):
     match = SPEEDING_VIOLATION_PATTERN.search(charge)
