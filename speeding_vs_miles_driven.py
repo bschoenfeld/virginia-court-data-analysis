@@ -32,7 +32,7 @@ SPEEDING_CODE_SECTIONS = [
     '82-4-10',
     '878'
 ]
-SPEEDING_VIOLATION_PATTERN = re.compile('[0-9]{2,3}(?:/|-| )[0-9]{1,2}')
+SPEEDING_VIOLATION_PATTERN = re.compile('[0-9]{2,3}(?:/|\\|-| )[0-9]{2}')
 
 def run():
     # Load daily vehicle miles traveled by locality from VDOT
@@ -172,7 +172,7 @@ def load_court_cases(path, traffic_by_court):
                 if violation is None:
                     continue
                 try:
-                    violation_parts = re.split('/|-| ', violation)
+                    violation_parts = re.split('/|\\|-| ', violation)
                     speed_actual = int(violation_parts[0])
                     speed_limit = int(violation_parts[1])
                 except ValueError:
