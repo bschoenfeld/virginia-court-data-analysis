@@ -34,7 +34,7 @@ def run():
     data.sort(key=lambda x: x[1], reverse=True)
     create_graph(data, 'miles_driven_vs_tickets_order_by_data.png')
 
-    data = [x for x in data if 'York' not in x[0] and 'Craig' not in x[0]]
+    data = [x for x in data if 'York' not in x[0]]
     data.sort(key=lambda x: x[0], reverse=True)
     create_graph(data, 'miles_driven_vs_tickets_order_by_locality.png')
 
