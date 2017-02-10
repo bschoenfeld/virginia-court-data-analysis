@@ -39,12 +39,46 @@ def run():
     create_graph(data, 'miles_driven_vs_tickets_order_by_locality.png')
 
 def create_graph(data, filename):
+    # Clear the figure
     plt.clf()
-    plt.barh(
+
+    plt.title('Miles Driven per Speeding Charge Filed (2015)')
+    plt.xlabel('Miles Driven')
+
+    # Draw the bar graph
+    rects = plt.barh(
         range(len(data)),
         [x[1] for x in data],
         tick_label=[x[0] for x in data])
+
+    # We want to write the value of the bar at the end of the bar
+    # We want to pad the value a bit and on bars that reach to
+    # the edge of the graph we want to set the value in the bar
+    # so that it doesn't run over the edge of the graph
+
+    # Get the axis limit, then make our base unit 1% of that
+    # and our limit for writing outside of the bar 90% of that
+    xlim_max = plt.gca().set_xlim()[1]
+    base_unit = int(xlim_max * 0.01)
+    over_margin = int(xlim_max * 0.9)
+    for rect in rects:
+        width = rect.get_width()
+        position = width + base_unit # pad the value
+        color = 'gray'
+        if width > over_margin:
+            # Set the value inside the bar if its over margin
+            position = width - base_unit * 8
+            color = 'white'
+        # Draw the text on the bar
+        plt.text(position, rect.get_y(),
+                 '%.2f M' % (int(width) / 1000000.0),
+                 va='bottom', color=color)
+
+    # Fix padding and margins
     plt.tight_layout()
+    plt.gca().set_ylim(-1, len(rects))
+
+    # Save the figure
     plt.savefig(filename)
 
 def load_traffic_data():
