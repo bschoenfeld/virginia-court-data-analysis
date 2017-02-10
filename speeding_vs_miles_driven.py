@@ -2,6 +2,7 @@ import csv
 import sys
 import re
 import matplotlib.pyplot as plt
+import numpy as np
 from os import environ, listdir
 from os.path import isfile, join
 from pprint import pprint
@@ -61,6 +62,24 @@ def run():
     data.sort(key=lambda x: x[0], reverse=True)
     create_graph(data, 'miles_driven_vs_tickets_order_by_locality.png')
 
+    mean = np.mean([x[1] for x in data])
+    std = np.std([x[1] for x in data])
+    data = [(x[0], (float(x[1]) - mean) / std) for x in data]
+    data.sort(key=lambda x: x[1], reverse=True)
+
+    plt.clf()
+    rects = plt.barh(
+        range(len(data)),
+        [x[1] for x in data],
+        tick_label=[x[0] for x in data])
+
+    # Fix padding and margins
+    plt.tight_layout()
+    plt.gca().set_ylim(-1, len(rects))
+
+    # Save the figure
+    plt.savefig('miles_driven_vs_tickets_std.png')
+
 def create_graph(data, filename):
     # Clear the figure
     plt.clf()
@@ -81,7 +100,7 @@ def create_graph(data, filename):
 
     # Get the axis limit, then make our base unit 1% of that
     # and our limit for writing outside of the bar 90% of that
-    xlim_max = plt.gca().set_xlim()[1]
+    xlim_max = plt.gca().get_xlim()[1]
     base_unit = int(xlim_max * 0.01)
     over_margin = int(xlim_max * 0.9)
     for rect in rects:
@@ -166,6 +185,7 @@ def load_court_cases(path, traffic_by_court):
                         #court['limits'][speed_limit].append(speed_actual)
                         court['chargeCount'] += 1
                         break
+            break
 
 def get_speeding_violation(charge, code_section):
     match = SPEEDING_VIOLATION_PATTERN.search(charge)
