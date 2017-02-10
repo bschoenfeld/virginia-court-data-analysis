@@ -6,8 +6,32 @@ from os import environ, listdir
 from os.path import isfile, join
 from pprint import pprint
 
-SPEEDING_KEYWORDS = ['SP', 'RD', 'R.D.', 'R/D', 'R D', 'RECK']
-SPEEDING_VIOLATION_PATTERN = re.compile('[0-9]{2,3}\/[0-9]{1,2}')
+SPEEDING_CODE_SECTIONS = [
+    '18.2-456',
+    '22-395',
+    '22-396',
+    '46.2-0000',
+    '46.2-830',
+    '46.2-848',
+    '46.2-852',
+    '46.2-861',
+    '46.2-862',
+    '46.2-863',
+    '46.2-865',
+    '46.2-870',
+    '46.2-871',
+    '46.2-872',
+    '46.2-873',
+    '46.2-874',
+    '46.2-875',
+    '46.2-876',
+    '46.2-878',
+    '46.2-881',
+    '46.2-882',
+    '82-4-10',
+    '878'
+]
+SPEEDING_VIOLATION_PATTERN = re.compile('[0-9]{2,3}(?:/|-| )[0-9]{1,2}')
 
 def run():
     # Load daily vehicle miles traveled by locality from VDOT
@@ -34,7 +58,6 @@ def run():
     data.sort(key=lambda x: x[1], reverse=True)
     create_graph(data, 'miles_driven_vs_tickets_order_by_data.png')
 
-    data = [x for x in data if 'York' not in x[0]]
     data.sort(key=lambda x: x[0], reverse=True)
     create_graph(data, 'miles_driven_vs_tickets_order_by_locality.png')
 
@@ -126,11 +149,16 @@ def load_court_cases(path, traffic_by_court):
         with open(f) as csvfile:
             reader = csv.DictReader(csvfile)
             for row in reader:
-                violation = get_speeding_violation(row['Charge'])
+                violation = get_speeding_violation(row['Charge'], row['CodeSection'])
                 if violation is None:
                     continue
-                speed_actual = int(violation.split('/')[0])
-                speed_limit = int(violation.split('/')[1])
+                try:
+                    violation_parts = re.split('/|-| ', violation)
+                    speed_actual = int(violation_parts[0])
+                    speed_limit = int(violation_parts[1])
+                except ValueError:
+                    print violation, row['Charge'], row['CodeSection']
+                    continue
                 for court in traffic_by_court:
                     if int(row['court_fips']) in court['fips']:
                         if speed_limit not in court['limits']:
@@ -139,18 +167,18 @@ def load_court_cases(path, traffic_by_court):
                         court['chargeCount'] += 1
                         break
 
-def get_speeding_violation(charge):
+def get_speeding_violation(charge, code_section):
     match = SPEEDING_VIOLATION_PATTERN.search(charge)
     if not match:
         # No regex match
         return None
 
-    violation = match.group(0)
-    if all([keyword not in charge for keyword in SPEEDING_KEYWORDS]) and violation != charge:
+    if all([c_s not in code_section for c_s in SPEEDING_CODE_SECTIONS]):
         # None of the speeding keywords are in the charge
         # and the violation isn't the only thing in the charge
         return None
 
+    violation = match.group(0)
     return violation
 
 run()
