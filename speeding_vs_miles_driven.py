@@ -62,9 +62,6 @@ def run():
     data.sort(key=lambda x: x[2], reverse=True)
     create_graph(data, 'miles_driven_vs_tickets_order_by_data.png')
 
-    data.sort(key=lambda x: x[0], reverse=True)
-    create_graph(data, 'miles_driven_vs_tickets_order_by_locality.png')
-
 def create_graph(data, filename):
     plt.clf()
 
@@ -75,6 +72,7 @@ def create_graph(data, filename):
     title += 'Fewer Tickets'
     plt.title(title)
     plt.xlabel('Standard Deviation')
+    plt.ylabel('Rank')
 
     rects = plt.barh(
         range(len(data)),
@@ -97,18 +95,15 @@ def create_graph(data, filename):
             color = 'white'
             horizontal_align = 'left' if rect.get_x() < 0 else 'right'
         position += base_unit if horizontal_align == 'left' else base_unit * -1
-        if position > 1.25:
-            position = 1.5 - base_unit
+        if position > 1.5:
+            position = 1.6 - base_unit
         plt.text(position, rect.get_y(),
-                 '%.2f M' % (int(x[1]) / 1000000.0),
+                 '%d K' % (int(x[1]) / 1000),
                  va='bottom', ha=horizontal_align, color=color)
 
     plt.gca().set_ylim(-1, len(rects))
-    plt.gca().set_xlim(-1.5, 1.5)
-    plt.tick_params(
-        axis='y',
-        left='off',
-        labelleft='off')
+    plt.gca().set_xlim(-1.6, 1.6)
+    plt.yticks(range(0, len(data)), reversed(range(1, len(data) + 1)))
     plt.tight_layout()
 
     # Save the figure
