@@ -50,75 +50,66 @@ def run():
         # Remove Manassas because it makes the locality name too long
         localities = [l for l in court['locality'] if 'Manassas' not in l]
         locality = ' / '.join(localities)
-        # Remove York and Craig because they are too high and skew the graph
         data.append((locality, court['all'] * 365 / court['chargeCount']))
+
+    mean = np.mean([x[1] for x in data])
+    std = np.std([x[1] for x in data])
+    data = [(x[0], x[1], (float(x[1]) - mean) / std) for x in data]
 
     plt.figure(figsize=(10, 30))
 
     # Plot in order of miles per violation
-    data.sort(key=lambda x: x[1], reverse=True)
+    data.sort(key=lambda x: x[2], reverse=True)
     create_graph(data, 'miles_driven_vs_tickets_order_by_data.png')
 
     data.sort(key=lambda x: x[0], reverse=True)
     create_graph(data, 'miles_driven_vs_tickets_order_by_locality.png')
 
-    mean = np.mean([x[1] for x in data])
-    std = np.std([x[1] for x in data])
-    data = [(x[0], (float(x[1]) - mean) / std) for x in data]
-    data.sort(key=lambda x: x[1], reverse=True)
-
-    plt.clf()
-    rects = plt.barh(
-        range(len(data)),
-        [x[1] for x in data],
-        tick_label=[x[0] for x in data])
-
-    # Fix padding and margins
-    plt.tight_layout()
-    plt.gca().set_ylim(-1, len(rects))
-
-    # Save the figure
-    plt.savefig('miles_driven_vs_tickets_std.png')
-
 def create_graph(data, filename):
-    # Clear the figure
     plt.clf()
 
-    plt.title('Miles Driven per Speeding Charge Filed (2015)')
-    plt.xlabel('Miles Driven')
+    title = 'Relative Frequency of Speeding Tickets in Virginia (2015)\n'
+    title += '(miles driven / ticket)\n'
+    title += 'More Tickets'
+    title += ' ' * 100
+    title += 'Fewer Tickets'
+    plt.title(title)
+    plt.xlabel('Standard Deviation')
 
-    # Draw the bar graph
     rects = plt.barh(
         range(len(data)),
-        [x[1] for x in data],
-        tick_label=[x[0] for x in data])
+        [x[2] for x in data])
 
-    # We want to write the value of the bar at the end of the bar
-    # We want to pad the value a bit and on bars that reach to
-    # the edge of the graph we want to set the value in the bar
-    # so that it doesn't run over the edge of the graph
-
-    # Get the axis limit, then make our base unit 1% of that
-    # and our limit for writing outside of the bar 90% of that
-    xlim_max = plt.gca().get_xlim()[1]
-    base_unit = int(xlim_max * 0.01)
-    over_margin = int(xlim_max * 0.9)
-    for rect in rects:
-        width = rect.get_width()
-        position = width + base_unit # pad the value
-        color = 'gray'
-        if width > over_margin:
-            # Set the value inside the bar if its over margin
-            position = width - base_unit * 8
-            color = 'white'
-        # Draw the text on the bar
+    base_unit = 0.025
+    for rect, x in zip(rects, data):
+        # Write the locality name
+        horizontal_align = 'left' if rect.get_x() < 0 else 'right'
+        position = base_unit if rect.get_x() < 0 else (base_unit * -1)
         plt.text(position, rect.get_y(),
-                 '%.2f M' % (int(width) / 1000000.0),
-                 va='bottom', color=color)
+                 x[0],
+                 va='bottom', ha=horizontal_align)
 
-    # Fix padding and margins
-    plt.tight_layout()
+        # Write the data figure
+        position = rect.get_x() if rect.get_x() < 0 else rect.get_width()
+        horizontal_align = 'right' if rect.get_x() < 0 else 'left'
+        color = 'gray'
+        if rect.get_width() > 0.2:
+            color = 'white'
+            horizontal_align = 'left' if rect.get_x() < 0 else 'right'
+        position += base_unit if horizontal_align == 'left' else base_unit * -1
+        if position > 1.25:
+            position = 1.5 - base_unit
+        plt.text(position, rect.get_y(),
+                 '%.2f M' % (int(x[1]) / 1000000.0),
+                 va='bottom', ha=horizontal_align, color=color)
+
     plt.gca().set_ylim(-1, len(rects))
+    plt.gca().set_xlim(-1.5, 1.5)
+    plt.tick_params(
+        axis='y',
+        left='off',
+        labelleft='off')
+    plt.tight_layout()
 
     # Save the figure
     plt.savefig(filename)
@@ -185,7 +176,7 @@ def load_court_cases(path, traffic_by_court):
                         #court['limits'][speed_limit].append(speed_actual)
                         court['chargeCount'] += 1
                         break
-            break
+            #break
 
 def get_speeding_violation(charge, code_section):
     match = SPEEDING_VIOLATION_PATTERN.search(charge)
