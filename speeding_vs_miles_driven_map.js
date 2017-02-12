@@ -15,23 +15,27 @@ var fipsWithoutCourt = {
     '580': '005'
 };
 
-// light red => dark red
+var lightRed = '#FF998B';
+var darkRed = '#BE1700';
+var lightBlue = '#8BF1FF';
+var darkBlue = '#00A7BE';
+
 var reds = d3.scale.linear().domain([0, 15])
              .interpolate(d3.interpolateHcl)
-             .range([d3.rgb("#FF998B"), d3.rgb('#BE1700')]);
+             .range([d3.rgb(lightRed), d3.rgb(darkRed)]);
 // light blue => dark blue
-var greens = d3.scale.linear().domain([0, 15])
+var blues = d3.scale.linear().domain([0, 15])
                .interpolate(d3.interpolateHcl)
-               .range([d3.rgb("#8BF1FF"), d3.rgb('#00A7BE')]);
+               .range([d3.rgb(lightBlue), d3.rgb(darkBlue)]);
 
 var canvas = document.getElementById('map-key');
 var ctx = canvas.getContext('2d');
 
 var gradient = ctx.createLinearGradient(50, 0, 890, 0);
-gradient.addColorStop(0, '#BE1700');
-gradient.addColorStop(0.5, '#FF998B');
-gradient.addColorStop(0.5, '#8BF1FF');
-gradient.addColorStop(1, '#00A7BE');
+gradient.addColorStop(0, darkRed);
+gradient.addColorStop(0.5, lightRed);
+gradient.addColorStop(0.5, lightBlue);
+gradient.addColorStop(1, darkBlue);
 ctx.fillStyle = gradient;
 ctx.fillRect(50, 0, 890, 10);
 
@@ -89,16 +93,13 @@ function renderMap(speedingData) {
                 var value = speedingData[fips] || speedingData[fips + 1];
                 var color = '#333';
                 if(value) {
-                    var colors = greens;
+                    var colors = blues;
                     if(value < 0) {
                         colors = reds;
                         value = value * -1;
                     }
 
                     value = parseInt(value / 0.1);
-                    //if(value > 1) {
-                    //    value = 1;
-                    //}
                     color = colors(value);
                 }
                 return "fill: " + color;
@@ -130,16 +131,8 @@ function renderMap(speedingData) {
             .style('stroke-width', 1.5);
 }
 
-function renderMapFill() {
-    gMap.selectAll("path")
-        .attr("style", function (d) {
-            if(!d.properties) return;
-            return "fill: #333";
-        });
-}
-
 // Load the data - Virginia counties in geojson
-d3.json("data/counties_va.json", function(error, countyData) {
+d3.json("data/counties_va.geojson", function(error, countyData) {
     if (error) {
         return console.error(error);
     }
