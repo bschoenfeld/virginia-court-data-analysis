@@ -87,3 +87,9 @@ ENV/
 
 # Rope project settings
 .ropeproject
+
+miles_driven_vs_tickets_order_by_data.png
+
+tickets.png
+
+data/speeding_vs_miles_driven.json

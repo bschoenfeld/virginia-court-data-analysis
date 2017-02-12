@@ -43,9 +43,8 @@ def run():
     court_data_path = sys.argv[1]
     load_court_cases(court_data_path, traffic_by_court)
 
+    # Create milesPerCharge for each court
     all_miles_per_charge = []
-    # For each locality, create a tuple with the name of the locality
-    # and the miles driven per ticket
     for court in traffic_by_court:
         # Remove Manassas because it makes the locality name too long
         localities = [l for l in court['locality'] if 'Manassas' not in l]
@@ -53,18 +52,22 @@ def run():
         court['milesPerCharge'] = court['all'] * 365 / court['chargeCount']
         all_miles_per_charge.append(court['milesPerCharge'])
 
+    # Get the standard deviation of milesPerCharge
     mean = np.mean(all_miles_per_charge)
     std = np.std(all_miles_per_charge)
 
+    # Create a metric for how many standard deviations each court is from the mean
     traffic_by_court_fips = {}
     for court in traffic_by_court:
         court['milesPerChargeStd'] = (float(court['milesPerCharge']) - mean) / std
         for fips in court['fips']:
             traffic_by_court_fips[fips] = court['milesPerChargeStd']
 
+    # Write the standard deviation metric to a json file so we can use it in a map
     with open('data/speeding_vs_miles_driven.json', 'w') as f:
         json.dump(traffic_by_court_fips, f)
 
+    # Generate the charts
     plt.figure(figsize=(10, 30))
     chart_miles_per_charge(traffic_by_court, 'miles_driven_vs_tickets_order_by_data.png')
     chart_charge_count(traffic_by_court, 'tickets.png')
