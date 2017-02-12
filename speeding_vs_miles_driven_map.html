@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>    
+    .background {
+        fill: none;
+        pointer-events: all;
+    }
+    
+    #counties {
+        fill: #aaa;
+    }
+    
+    #county-borders {
+        fill: none;
+        stroke: #fff;
+        stroke-width: 1.5px;
+        stroke-linejoin: round;
+        stroke-linecap: round;
+        pointer-events: none;
+    }
+
+    #map-key-wrapper {
+        position: absolute;
+        top: 480px;
+        width: 890px;
+    }
+
+    #map-key {
+        position: absolute;
+    }
+
+    .map-key-label {
+        display: inline-block;
+        width: 50%;
+        margin: 20px -1px;
+        text-align: center;
+        color: #666;
+        font-size: small;
+        font-family: sans-serif;
+    }
+</style>
+
+<body>
+    <div id="map"></div>
+    <div id="map-key-wrapper">
+        <canvas id="map-key" width="890px"></canvas>
+        <div style="margin-left: 50px">
+            <div class="map-key-label">
+                More Tickets Than Average
+            </div>
+            <div class="map-key-label">
+                Fewer Tickets Than Average
+            </div>
+        </div>
+    </div>
+
+    <script src="//d3js.org/d3.v3.min.js" charset="utf-8"></script>
+    <script src="//d3js.org/topojson.v1.min.js"></script>
+    <script src="speeding_vs_miles_driven_map.js"></script>
+</body>

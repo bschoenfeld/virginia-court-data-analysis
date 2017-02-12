@@ -1,4 +1,5 @@
 import csv
+import json
 import sys
 import re
 import matplotlib.pyplot as plt
@@ -42,27 +43,70 @@ def run():
     court_data_path = sys.argv[1]
     load_court_cases(court_data_path, traffic_by_court)
 
-    # Graph miles driven per ticket by locality
-    data = []
+    all_miles_per_charge = []
     # For each locality, create a tuple with the name of the locality
     # and the miles driven per ticket
     for court in traffic_by_court:
         # Remove Manassas because it makes the locality name too long
         localities = [l for l in court['locality'] if 'Manassas' not in l]
-        locality = ' / '.join(localities)
-        data.append((locality, court['all'] * 365 / court['chargeCount']))
+        court['localityNames'] = ' / '.join(localities)
+        court['milesPerCharge'] = court['all'] * 365 / court['chargeCount']
+        all_miles_per_charge.append(court['milesPerCharge'])
 
-    mean = np.mean([x[1] for x in data])
-    std = np.std([x[1] for x in data])
-    data = [(x[0], x[1], (float(x[1]) - mean) / std) for x in data]
+    mean = np.mean(all_miles_per_charge)
+    std = np.std(all_miles_per_charge)
+
+    traffic_by_court_fips = {}
+    for court in traffic_by_court:
+        court['milesPerChargeStd'] = (float(court['milesPerCharge']) - mean) / std
+        for fips in court['fips']:
+            traffic_by_court_fips[fips] = court['milesPerChargeStd']
+
+    with open('data/speeding_vs_miles_driven.json', 'w') as f:
+        json.dump(traffic_by_court_fips, f)
 
     plt.figure(figsize=(10, 30))
+    chart_miles_per_charge(traffic_by_court, 'miles_driven_vs_tickets_order_by_data.png')
+    chart_charge_count(traffic_by_court, 'tickets.png')
 
-    # Plot in order of miles per violation
-    data.sort(key=lambda x: x[2], reverse=True)
-    create_graph(data, 'miles_driven_vs_tickets_order_by_data.png')
+def chart_charge_count(traffic_by_court, filename):
+    traffic_by_court.sort(key=lambda x: x['chargeCount'])
 
-def create_graph(data, filename):
+    plt.clf()
+
+    plt.title('Tickets by Locality (2015)')
+    plt.xlabel('Tickets')
+
+    rects = plt.barh(
+        range(len(traffic_by_court)),
+        [x['chargeCount'] for x in traffic_by_court],
+        tick_label=[x['localityNames'] for x in traffic_by_court])
+
+    xlim_max = plt.gca().get_xlim()[1]
+    base_unit = int(xlim_max * 0.005)
+    under_margin = int(xlim_max * 0.1)
+
+    for rect in rects:
+        width = rect.get_width()
+        position = width - base_unit
+        horizontal_align = 'right'
+        color = 'white'
+        if width < under_margin:
+            # Set the value inside the bar if its over margin
+            position = width + base_unit # pad the value
+            horizontal_align = 'left'
+            color = 'gray'
+        plt.text(position, rect.get_y(),
+                 '%d' % width,
+                 va='bottom', ha=horizontal_align, color=color)
+
+    plt.gca().set_ylim(-1, len(rects))
+    plt.tight_layout()
+    plt.savefig(filename)
+
+def chart_miles_per_charge(traffic_by_court, filename):
+    traffic_by_court.sort(key=lambda x: x['milesPerChargeStd'], reverse=True)
+
     plt.clf()
 
     title = 'Relative Frequency of Speeding Tickets in Virginia (2015)\n'
@@ -75,16 +119,16 @@ def create_graph(data, filename):
     plt.ylabel('Rank')
 
     rects = plt.barh(
-        range(len(data)),
-        [x[2] for x in data])
+        range(len(traffic_by_court)),
+        [x['milesPerChargeStd'] for x in traffic_by_court])
 
     base_unit = 0.025
-    for rect, x in zip(rects, data):
+    for rect, x in zip(rects, traffic_by_court):
         # Write the locality name
         horizontal_align = 'left' if rect.get_x() < 0 else 'right'
         position = base_unit if rect.get_x() < 0 else (base_unit * -1)
         plt.text(position, rect.get_y(),
-                 x[0],
+                 x['localityNames'],
                  va='bottom', ha=horizontal_align)
 
         # Write the data figure
@@ -98,12 +142,12 @@ def create_graph(data, filename):
         if position > 1.5:
             position = 1.6 - base_unit
         plt.text(position, rect.get_y(),
-                 '%d K' % (int(x[1]) / 1000),
+                 '%d K' % (int(x['milesPerCharge']) / 1000),
                  va='bottom', ha=horizontal_align, color=color)
 
     plt.gca().set_ylim(-1, len(rects))
     plt.gca().set_xlim(-1.6, 1.6)
-    plt.yticks(range(0, len(data)), reversed(range(1, len(data) + 1)))
+    plt.yticks(range(0, len(traffic_by_court)), reversed(range(1, len(traffic_by_court) + 1)))
     plt.tight_layout()
 
     # Save the figure
