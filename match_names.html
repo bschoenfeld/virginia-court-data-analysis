@@ -53,6 +53,7 @@
                 var parseDate = d3.time.format('%Y-%m-%d');
 
                 cases.forEach(function(c){
+                    c["Court"] = courts[c.fips];
                     if(c.ArrestDate)
                         c["ArrestDate"] = parseDate.parse(c["ArrestDate"]);
                     c["OffenseDate"] = parseDate.parse(c["OffenseDate"]);
@@ -119,7 +120,7 @@
                         tooltip.html(function () {
                             var dob = parseDate.parse(c.DOB).toDateString().split(" ").slice(1, 3).join(" ");
                             var lines = [
-                                [c.CaseNumber],
+                                [c.CaseNumber, " ", c.Court],
                                 [c.Name, "&emsp; (", dob, ")"],
                                 ["&emsp;&emsp; Race: ", c.Race],
                                 ["&emsp;&emsp; Address: ", c.Address],
@@ -230,9 +231,16 @@
 
             };
 
-            d3.json("match_names.json", function(error, data) {
+            var courts = {};
+            d3.csv("data/district_courts.csv", function(error, data) {
                 data.forEach(function(d) {
-                    createFigure(d);
+                    courts[d.fips] = d.name;
+                });
+
+                d3.json("match_names.json", function(error, data) {
+                    data.forEach(function(d) {
+                        createFigure(d);
+                    });
                 });
             });
         </script>
