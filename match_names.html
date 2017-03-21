@@ -80,8 +80,7 @@
                 endDate = new Date(endDate.getFullYear() + 1, endDate.getMonth(), endDate.getDate());
 
                 var x = d3.time.scale()
-                    .range([0, width])
-                    .clamp(1);
+                    .range([0, width]);
                 
                 var y = d3.scale.ordinal()
                     .rangeRoundBands([0, cases.length * 20], .1);
@@ -98,6 +97,9 @@
                 y.domain(cases.map(function(c) { return c["CaseNumber"]; }));
 
                 svg.append("g")
+                    .attr("class", "bar-area");
+
+                svg.append("g")
                     .attr("class", "x axis")
                     .call(xAxis);
 
@@ -105,11 +107,78 @@
                     .attr("class", "y axis")
                     .call(yAxis);
                 
-                var bars = svg.selectAll()
+                function draw() {
+                    svg.select('.x.axis').call(xAxis);
+                    svg.select('.y.axis').call(yAxis);
+
+                    svg.selectAll(".case-bar")
+                        .attr("height", y.rangeBand())
+                        .attr("x", function(c) { return x(c.FiledDate); })
+                        .attr("width", function(c) {
+                            var lastHearing = d3.max(c.Hearings, function(h) {
+                                return h.Date; 
+                            });
+                            return x(lastHearing) - x(c.FiledDate);
+                        })
+                        .style("fill", function(c) {
+                            var notGuilty = ["Not Guilty", "Dismissed"];
+                            return notGuilty.indexOf(c.FinalDisposition) === -1 ? "#FF7B7B" : "#7BFF7B";
+                        });
+                    
+                    svg.selectAll(".costFines-bar")
+                        .attr("y", y.rangeBand()*0.75)
+                        .attr("height", y.rangeBand()*0.25)
+                        .attr("x", function(c) {
+                            var lastHearing = d3.max(c.Hearings, function(h) {
+                                return h.Date; 
+                            });
+                            return x(lastHearing);
+                        })
+                        .attr("width", function(c) {
+                            var fineCosts = c.Costs + c.Fine;
+                            if (fineCosts > 0) {
+                                var lastHearing = d3.max(c.Hearings, function(h) {
+                                    return h.Date; 
+                                });
+                                var fineCostsPaid = width;
+                                if(c.FineCostsPaidDate) {
+                                    fineCostsPaid = x(parseDate.parse(c.FineCostsPaidDate));
+                                }
+                                return fineCostsPaid - x(lastHearing);
+                            }
+                            return 0;
+                        })
+                        .style("fill", "#FF7B7B");
+                    
+                    svg.selectAll(".charge-text")
+                        .attr("x", function(c) { return x(c.FiledDate); })
+                        .attr("y", y.rangeBand() * 0.25)
+                        .attr("dy", "0.5em")
+                        .attr("dx", "0.5em");
+                    
+                    svg.selectAll(".hearing-tick")
+                        .attr("x1", function(h) { return x(h.Date); })
+                        .attr("x2", function(h) { return x(h.Date); })
+                        .attr("y1", y.rangeBand() * 0.75)
+                        .attr("y2", y.rangeBand())
+                        .style("stroke", "#000");
+                }
+
+                var wrapper = svg.select(".bar-area");
+
+                var bars = wrapper.selectAll(".bar")
                         .data(cases)
                     .enter().append("g")
                         .attr("class", "bar")
                         .attr("transform", function(c) { return "translate(0," + y(c.CaseNumber) + ")"; })
+                    .on('dblclick', function(c) {
+                        var lastHearing = d3.max(c.Hearings, function(h) {
+                            return h.Date; 
+                        });
+
+                        x.domain([c.FiledDate, lastHearing]);
+                        svg.select(".x.axis").call(xAxis);
+                    })
                     .on('mouseover', function (c, i) {
                         tooltip.transition()
                             .duration(200)
@@ -161,49 +230,13 @@
                     });
                 
                 bars.append("rect")
-                    .attr("height", y.rangeBand())
-                    .attr("x", function(c) { return x(c.FiledDate); })
-                    .attr("width", function(c) {
-                        var lastHearing = d3.max(c.Hearings, function(h) {
-                            return h.Date; 
-                        });
-                        return x(lastHearing) - x(c.FiledDate);
-                    })
-                    .style("fill", function(c) {
-                        var notGuilty = ["Not Guilty", "Dismissed"];
-                        return notGuilty.indexOf(c.FinalDisposition) === -1 ? "#FF7B7B" : "#7BFF7B";
-                    });
+                    .attr("class", "case-bar");
                 
                 bars.append("rect")
-                    .attr("y", y.rangeBand()*0.75)
-                    .attr("height", y.rangeBand()*0.25)
-                    .attr("x", function(c) {
-                        var lastHearing = d3.max(c.Hearings, function(h) {
-                            return h.Date; 
-                        });
-                        return x(lastHearing);
-                    })
-                    .attr("width", function(c) {
-                        var fineCosts = c.Costs + c.Fine;
-                        if (fineCosts > 0) {
-                            var lastHearing = d3.max(c.Hearings, function(h) {
-                                return h.Date; 
-                            });
-                            var fineCostsPaid = width;
-                            if(c.FineCostsPaidDate) {
-                                fineCostsPaid = x(parseDate.parse(c.FineCostsPaidDate));
-                            }
-                            return fineCostsPaid - x(lastHearing);
-                        }
-                        return 0;
-                    })
-                    .style("fill", "#FF7B7B");
+                    .attr("class", "costFines-bar");
                 
                 bars.append("text")
-                    .attr("x", function(c) { return x(c.FiledDate); })
-                    .attr("y", y.rangeBand() * 0.25)
-                    .attr("dy", "0.5em")
-                    .attr("dx", "0.5em")
+                    .attr("class", "charge-text")
                     .style("font" ,"10px sans-serif")
                     .style("text-anchor", "begin")
                     .text(function(c) {
@@ -223,11 +256,22 @@
                 bars.selectAll()
                         .data(function(c) { return c.Hearings; })
                     .enter().append("line")
-                        .attr("x1", function(h) { return x(h.Date); })
-                        .attr("x2", function(h) { return x(h.Date); })
-                        .attr("y1", y.rangeBand() * 0.75)
-                        .attr("y2", y.rangeBand())
-                        .style("stroke", "#000");
+                        .attr("class", "hearing-tick");
+
+                draw();
+
+                var xzoom = d3.behavior.zoom()
+                    .x(x)
+                    .on("zoom", draw);
+                
+                svg.append("svg:rect")
+                    .attr("class", "zoom x box")
+                    .attr("width", width)
+                    .attr("height", margin.top)
+                    .attr("transform", "translate(" + 0 + "," + -margin.top + ")")
+                    .style("visibility", "hidden")
+                    .attr("pointer-events", "all")
+                    .call(xzoom);
 
             };
 
