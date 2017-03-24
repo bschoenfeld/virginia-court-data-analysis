@@ -1,134 +1,134 @@
-"name","fips"
-"Accomack General District Court",1
-"Albemarle General District Court",3
-"Alleghany General District Court",5
-"Amelia General District Court",7
-"Amherst General District Court",9
-"Appomattox General District Court",11
-"Arlington General District Court",13
-"Augusta General District Court",15
-"Bath General District Court",17
-"Bedford General District Court",19
-"Bland General District Court",21
-"Botetourt General District Court",23
-"Brunswick General District Court",25
-"Buchanan General District Court",27
-"Buckingham General District Court",29
-"Campbell General District Court",31
-"Caroline General District Court",33
-"Carroll General District Court",35
-"Charles City General District Court",36
-"Charlotte General District Court",37
-"Chesterfield General District Court",41
-"Clarke General District Court",43
-"Craig General District Court",45
-"Culpeper General District Court",47
-"Cumberland General District Court",49
-"Dickenson General District Court",51
-"Dinwiddie General District Court",53
-"Essex General District Court",57
-"Fairfax County General District Court",59
-"Fauquier General District Court",61
-"Floyd General District Court",63
-"Fluvanna General District Court",65
-"Franklin County General District Court",67
-"Frederick General District Court",69
-"Giles General District Court",71
-"Gloucester General District Court",73
-"Goochland General District Court",75
-"Grayson General District Court",77
-"Greene General District Court",79
-"Greensville General District Court",81
-"Halifax General District Court",83
-"Hanover General District Court",85
-"Henrico General District Court",87
-"Henry General District Court",89
-"Highland General District Court",91
-"Isle of Wight General District Court",93
-"King and Queen General District Court",97
-"King George General District Court",99
-"King William General District Court",101
-"Lancaster General District Court",103
-"Lee General District Court",105
-"Loudoun General District Court",107
-"Louisa General District Court",109
-"Lunenburg General District Court",111
-"Madison General District Court",113
-"Mathews General District Court",115
-"Mecklenburg General District Court",117
-"Middlesex General District Court",119
-"Montgomery/Christiansburg General District Court",121
-"Montgomery/Blacksburg General District Court",122
-"Nelson General District Court",125
-"New Kent General District Court",127
-"Northampton General District Court",131
-"Northumberland General District Court",133
-"Nottoway General District Court",135
-"Orange General District Court",137
-"Page General District Court",139
-"Patrick General District Court",141
-"Pittsylvania General District Court",143
-"Powhatan General District Court",145
-"Prince Edward General District Court",147
-"Prince George General District Court",149
-"Prince William General District Court",153
-"Pulaski General District Court",155
-"Rappahannock General District Court",157
-"Richmond County General District Court",159
-"Roanoke County General District Court",161
-"Lexington/Rockbridge General District Court",163
-"Harrisonburg/Rockingham General District Court",165
-"Russell General District Court",167
-"Scott General District Court",169
-"Shenandoah General District Court",171
-"Smyth General District Court",173
-"Southampton General District Court",175
-"Spotsylvania General District Court",177
-"Stafford General District Court",179
-"Surry General District Court",181
-"Sussex General District Court",183
-"Tazewell General District Court",185
-"Warren General District Court",187
-"Washington General District Court",191
-"Westmoreland General District Court",193
-"Wise/Norton General District Court",195
-"Wythe General District Court",197
-"York General District Court",199
-"Alexandria General District Court",510
-"Bristol General District Court",520
-"Buena Vista General District Court",530
-"Charlottesville General District Court",540
-"Chesapeake General District Court",550
-"Colonial Heights General District Court",570
-"Danville General District Court",590
-"Emporia General District Court",595
-"Fairfax City General District Court",600
-"Falls Church General District Court",610
-"Franklin City General District Court",620
-"Fredericksburg General District Court",630
-"Galax General District Court",640
-"Hampton General District Court",650
-"Hopewell General District Court",670
-"Lynchburg General District Court",680
-"Martinsville General District Court",690
-"Newport News-Criminal General District Court",701
-"Newport News-Traffic General District Court",702
-"Newport News-Civil General District Court",703
-"Norfolk-Criminal General District Court",711
-"Norfolk-Traffic General District Court",712
-"Norfolk-Civil General District Court",713
-"Petersburg General District Court",730
-"Portsmouth General District Court",740
-"Radford General District Court",750
-"Richmond-Marsh Criminal/Traffic General District Court at Manchester",761
-"Richmond-John Marshall Criminal/Traffic General District Court",762
-"Richmond-Civil General District Court",763
-"Richmond Manchester General District Court",764
-"Roanoke City General District Court",770
-"Salem General District Court",775
-"Staunton General District Court",790
-"Suffolk General District Court",800
-"Virginia Beach General District Court",810
-"Waynesboro General District Court",820
-"Williamsburg/James City County General District Court",830
-"Winchester General District Court",840
+"fips","name"
+1,"Accomack General District Court"
+3,"Albemarle General District Court"
+5,"Alleghany General District Court"
+7,"Amelia General District Court"
+9,"Amherst General District Court"
+11,"Appomattox General District Court"
+13,"Arlington General District Court"
+15,"Augusta General District Court"
+17,"Bath General District Court"
+19,"Bedford General District Court"
+21,"Bland General District Court"
+23,"Botetourt General District Court"
+25,"Brunswick General District Court"
+27,"Buchanan General District Court"
+29,"Buckingham General District Court"
+31,"Campbell General District Court"
+33,"Caroline General District Court"
+35,"Carroll General District Court"
+36,"Charles City General District Court"
+37,"Charlotte General District Court"
+41,"Chesterfield General District Court"
+43,"Clarke General District Court"
+45,"Craig General District Court"
+47,"Culpeper General District Court"
+49,"Cumberland General District Court"
+51,"Dickenson General District Court"
+53,"Dinwiddie General District Court"
+57,"Essex General District Court"
+59,"Fairfax County General District Court"
+61,"Fauquier General District Court"
+63,"Floyd General District Court"
+65,"Fluvanna General District Court"
+67,"Franklin County General District Court"
+69,"Frederick General District Court"
+71,"Giles General District Court"
+73,"Gloucester General District Court"
+75,"Goochland General District Court"
+77,"Grayson General District Court"
+79,"Greene General District Court"
+81,"Greensville General District Court"
+83,"Halifax General District Court"
+85,"Hanover General District Court"
+87,"Henrico General District Court"
+89,"Henry General District Court"
+91,"Highland General District Court"
+93,"Isle of Wight General District Court"
+97,"King and Queen General District Court"
+99,"King George General District Court"
+101,"King William General District Court"
+103,"Lancaster General District Court"
+105,"Lee General District Court"
+107,"Loudoun General District Court"
+109,"Louisa General District Court"
+111,"Lunenburg General District Court"
+113,"Madison General District Court"
+115,"Mathews General District Court"
+117,"Mecklenburg General District Court"
+119,"Middlesex General District Court"
+121,"Montgomery/Christiansburg General District Court"
+122,"Montgomery/Blacksburg General District Court"
+125,"Nelson General District Court"
+127,"New Kent General District Court"
+131,"Northampton General District Court"
+133,"Northumberland General District Court"
+135,"Nottoway General District Court"
+137,"Orange General District Court"
+139,"Page General District Court"
+141,"Patrick General District Court"
+143,"Pittsylvania General District Court"
+145,"Powhatan General District Court"
+147,"Prince Edward General District Court"
+149,"Prince George General District Court"
+153,"Prince William General District Court"
+155,"Pulaski General District Court"
+157,"Rappahannock General District Court"
+159,"Richmond County General District Court"
+161,"Roanoke County General District Court"
+163,"Lexington/Rockbridge General District Court"
+165,"Harrisonburg/Rockingham General District Court"
+167,"Russell General District Court"
+169,"Scott General District Court"
+171,"Shenandoah General District Court"
+173,"Smyth General District Court"
+175,"Southampton General District Court"
+177,"Spotsylvania General District Court"
+179,"Stafford General District Court"
+181,"Surry General District Court"
+183,"Sussex General District Court"
+185,"Tazewell General District Court"
+187,"Warren General District Court"
+191,"Washington General District Court"
+193,"Westmoreland General District Court"
+195,"Wise/Norton General District Court"
+197,"Wythe General District Court"
+199,"York General District Court"
+510,"Alexandria General District Court"
+520,"Bristol General District Court"
+530,"Buena Vista General District Court"
+540,"Charlottesville General District Court"
+550,"Chesapeake General District Court"
+570,"Colonial Heights General District Court"
+590,"Danville General District Court"
+595,"Emporia General District Court"
+600,"Fairfax City General District Court"
+610,"Falls Church General District Court"
+620,"Franklin City General District Court"
+630,"Fredericksburg General District Court"
+640,"Galax General District Court"
+650,"Hampton General District Court"
+670,"Hopewell General District Court"
+680,"Lynchburg General District Court"
+690,"Martinsville General District Court"
+701,"Newport News-Criminal General District Court"
+702,"Newport News-Traffic General District Court"
+703,"Newport News-Civil General District Court"
+711,"Norfolk-Criminal General District Court"
+712,"Norfolk-Traffic General District Court"
+713,"Norfolk-Civil General District Court"
+730,"Petersburg General District Court"
+740,"Portsmouth General District Court"
+750,"Radford General District Court"
+761,"Richmond-Marsh Criminal/Traffic General District Court at Manchester"
+762,"Richmond-John Marshall Criminal/Traffic General District Court"
+763,"Richmond-Civil General District Court"
+764,"Richmond Manchester General District Court"
+770,"Roanoke City General District Court"
+775,"Salem General District Court"
+790,"Staunton General District Court"
+800,"Suffolk General District Court"
+810,"Virginia Beach General District Court"
+820,"Waynesboro General District Court"
+830,"Williamsburg/James City County General District Court"
+840,"Winchester General District Court"
