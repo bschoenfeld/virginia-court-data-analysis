@@ -30,6 +30,8 @@ SPEEDING_CODE_SECTIONS = [
     '46.2-878',
     '46.2-881',
     '46.2-882',
+    '46.2-1003', # DEFECTIVE SPEEDOMETER
+    '46.2-1080', # DEFECTIVE SPEEDOMETER
     '82-4-10',
     '878'
 ]
@@ -49,6 +51,7 @@ def run():
         # Remove Manassas because it makes the locality name too long
         localities = [l for l in court['locality'] if 'Manassas' not in l]
         court['localityNames'] = ' / '.join(localities)
+        court['excessSpeedsMean'] = np.mean(court['excessSpeeds'])
         court['milesPerCharge'] = court['all'] * 365 / court['chargeCount']
         all_miles_per_charge.append(court['milesPerCharge'])
 
@@ -73,7 +76,7 @@ def run():
     chart_charge_count(traffic_by_court, 'tickets.png')
 
 def chart_charge_count(traffic_by_court, filename):
-    traffic_by_court.sort(key=lambda x: x['chargeCount'])
+    traffic_by_court.sort(key=lambda x: x['excessSpeedsMean'])
 
     plt.clf()
 
@@ -82,7 +85,7 @@ def chart_charge_count(traffic_by_court, filename):
 
     rects = plt.barh(
         range(len(traffic_by_court)),
-        [x['chargeCount'] for x in traffic_by_court],
+        [x['excessSpeedsMean'] for x in traffic_by_court],
         tick_label=[x['localityNames'] for x in traffic_by_court])
 
     xlim_max = plt.gca().get_xlim()[1]
@@ -142,14 +145,14 @@ def chart_miles_per_charge(traffic_by_court, filename):
             color = 'white'
             horizontal_align = 'left' if rect.get_x() < 0 else 'right'
         position += base_unit if horizontal_align == 'left' else base_unit * -1
-        if position > 1.5:
-            position = 1.6 - base_unit
+        if position > 1.6:
+            position = 1.7 - base_unit
         plt.text(position, rect.get_y(),
                  '%d K' % (int(x['milesPerCharge']) / 1000),
                  va='bottom', ha=horizontal_align, color=color)
 
     plt.gca().set_ylim(-1, len(rects))
-    plt.gca().set_xlim(-1.6, 1.6)
+    plt.gca().set_xlim(-1.7, 1.7)
     plt.yticks(range(0, len(traffic_by_court)), reversed(range(1, len(traffic_by_court) + 1)))
     plt.tight_layout()
 
@@ -176,6 +179,7 @@ def load_traffic_data():
                     'primary': 0,
                     'secondary': 0,
                     'limits': {},
+                    'excessSpeeds': [],
                     'chargeCount': 0
                 }
             cur = traffic[row['District Court FIPS Codes']]
@@ -215,23 +219,37 @@ def load_court_cases(path, traffic_by_court):
                     if int(row['court_fips']) in court['fips']:
                         if speed_limit not in court['limits']:
                             court['limits'][speed_limit] = []
-                        #court['limits'][speed_limit].append(speed_actual)
+                        court['limits'][speed_limit].append(speed_actual)
+                        court['excessSpeeds'].append(speed_actual - speed_limit)
                         court['chargeCount'] += 1
                         break
+            print count_regex, count_speed
             #break
 
+count_regex = 0
+count_speed = 0
+
 def get_speeding_violation(charge, code_section):
+    global count_regex, count_speed
     match = SPEEDING_VIOLATION_PATTERN.search(charge)
-    if not match:
+    speeding = False #'SPEED' in charge or 'RECK' in charge
+
+    if not match and not speeding:
         # No regex match
         return None
 
     if all([c_s not in code_section for c_s in SPEEDING_CODE_SECTIONS]):
         # None of the speeding keywords are in the charge
         # and the violation isn't the only thing in the charge
+        #print charge, code_section
         return None
 
-    violation = match.group(0)
+    if match:
+        count_regex += 1
+    else:
+        count_speed += 1
+
+    violation = match.group(0) if match else speeding
     return violation
 
 run()
