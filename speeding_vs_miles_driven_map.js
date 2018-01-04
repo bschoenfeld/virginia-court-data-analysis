@@ -85,7 +85,7 @@ function renderMap(speedingData) {
         .enter().append("path")
             .attr("d", path)
             .attr("style", function (d) {
-                var fips = d.properties.COUNTYFP;
+                var fips = d.properties.STCOFIPS.substring(2);
                 if(fipsWithoutCourt.hasOwnProperty(fips)) {
                     fips = fipsWithoutCourt[fips];
                 }
@@ -105,7 +105,7 @@ function renderMap(speedingData) {
                 return "fill: " + color;
             })
             .attr("data-fips", function (d) {
-                return d.properties.COUNTYFP;
+                return d.properties.STCOFIPS.substring(2);
             });
     
     gMap.append("path")
@@ -115,7 +115,7 @@ function renderMap(speedingData) {
     
     var featureGroup = gMap.append('g').attr('class', 'feature-group');
     featureGroup.selectAll('.route')
-        .data(roads.features)
+        .data(roads.geometries)
         .enter()
             .append('path')
             .attr('class', 'route')
@@ -123,22 +123,18 @@ function renderMap(speedingData) {
             .style('fill', 'white')
             .style('fill-opacity', 0)
             .style('stroke', '#333')
-            .style('stroke-opacity', function(d) {
-                if(d.properties.name && d.properties.name.indexOf('Interstate Route') !== -1)
-                    return 0.9;
-                return 0;
-            })
+            .style('stroke-opacity', 0.9)
             .style('stroke-width', 1.5);
 }
 
 // Load the data - Virginia counties in geojson
-d3.json("data/counties_va.geojson", function(error, countyData) {
+d3.json("data/VA_COUNTY.json", function(error, countyData) {
     if (error) {
         return console.error(error);
     }
     counties = countyData;
 
-    d3.json("data/roadways_va.geojson", function(error, roadData) {
+    d3.json("data/interstates_va.json", function(error, roadData) {
         if (error) {
             return console.error(error);
         }
