@@ -216,7 +216,7 @@ def load_court_cases(path, traffic_by_court):
                     print violation, row['Charge'], row['CodeSection']
                     continue
                 for court in traffic_by_court:
-                    if int(row['court_fips']) in court['fips']:
+                    if int(row['fips']) in court['fips']:
                         if speed_limit not in court['limits']:
                             court['limits'][speed_limit] = []
                         court['limits'][speed_limit].append(speed_actual)
