@@ -30,8 +30,8 @@ SPEEDING_CODE_SECTIONS = [
     '46.2-878',
     '46.2-881',
     '46.2-882',
-    '46.2-1003', # DEFECTIVE SPEEDOMETER
-    '46.2-1080', # DEFECTIVE SPEEDOMETER
+    #'46.2-1003', # DEFECTIVE SPEEDOMETER
+    #'46.2-1080', # DEFECTIVE SPEEDOMETER
     '82-4-10',
     '878'
 ]
@@ -47,6 +47,7 @@ def run():
 
     # Create milesPerCharge for each court
     all_miles_per_charge = []
+    all_excess_speed_means = []
     for court in traffic_by_court:
         # Remove Manassas because it makes the locality name too long
         localities = [l for l in court['locality'] if 'Manassas' not in l]
@@ -54,10 +55,13 @@ def run():
         court['excessSpeedsMean'] = np.mean(court['excessSpeeds'])
         court['milesPerCharge'] = court['all'] * 365 / court['chargeCount']
         all_miles_per_charge.append(court['milesPerCharge'])
+        all_excess_speed_means.append(court['excessSpeedsMean'])
 
     # Get the standard deviation of milesPerCharge
     mean = np.mean(all_miles_per_charge)
     std = np.std(all_miles_per_charge)
+
+    print np.mean(all_excess_speed_means), np.std(all_excess_speed_means)
 
     # Create a metric for how many standard deviations each court is from the mean
     traffic_by_court_fips = {}
@@ -73,19 +77,29 @@ def run():
     # Generate the charts
     plt.figure(figsize=(10, 30))
     chart_miles_per_charge(traffic_by_court, 'miles_driven_vs_tickets_order_by_data.png')
-    chart_charge_count(traffic_by_court, 'tickets.png')
+    chart_count(traffic_by_court, 'chargeCount', 
+        'Tickets by Locality (2016)', 'Tickets', 'tickets.png')
+    
+    excess_speed_upper_threshold = np.mean(all_excess_speed_means) + np.std(all_excess_speed_means)
+    excess_speed_lower_threshold = np.mean(all_excess_speed_means) - np.std(all_excess_speed_means)
+    filtered_traffic_by_court = [
+        x for x in traffic_by_court 
+        if x['excessSpeedsMean'] > excess_speed_upper_threshold or x['excessSpeedsMean'] < excess_speed_lower_threshold
+    ]
+    chart_count(filtered_traffic_by_court, 'excessSpeedsMean', 
+        'Average Speed Over Limit by Locality (2016)', 'Average Speed Over Limit', 'excessSpeeds.png')
 
-def chart_charge_count(traffic_by_court, filename):
-    traffic_by_court.sort(key=lambda x: x['excessSpeedsMean'])
+def chart_count(traffic_by_court, field, title, x_label, filename):
+    traffic_by_court.sort(key=lambda x: x[field])
 
     plt.clf()
 
-    plt.title('Tickets by Locality (2015)')
-    plt.xlabel('Tickets')
+    plt.title(title)
+    plt.xlabel(x_label)
 
     rects = plt.barh(
         range(len(traffic_by_court)),
-        [x['excessSpeedsMean'] for x in traffic_by_court],
+        [x[field] for x in traffic_by_court],
         tick_label=[x['localityNames'] for x in traffic_by_court])
 
     xlim_max = plt.gca().get_xlim()[1]
