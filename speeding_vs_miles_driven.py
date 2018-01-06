@@ -37,6 +37,8 @@ SPEEDING_CODE_SECTIONS = [
 ]
 SPEEDING_VIOLATION_PATTERN = re.compile('[0-9]{2,3}(?:/|\\|-| )[0-9]{2}')
 
+SPEED_LIMITS = ['35', '45', '55', '65', '70']
+
 def run():
     # Load daily vehicle miles traveled by locality from VDOT
     traffic_by_court = load_traffic_data()
@@ -61,8 +63,6 @@ def run():
     mean = np.mean(all_miles_per_charge)
     std = np.std(all_miles_per_charge)
 
-    print np.mean(all_excess_speed_means), np.std(all_excess_speed_means)
-
     # Create a metric for how many standard deviations each court is from the mean
     traffic_by_court_fips = {}
     for court in traffic_by_court:
@@ -73,6 +73,21 @@ def run():
     # Write the standard deviation metric to a json file so we can use it in a map
     with open('data/speeding_vs_miles_driven.json', 'w') as f:
         json.dump(traffic_by_court_fips, f)
+
+    # Write speed data to files
+    for speed_limit in SPEED_LIMITS:
+        with open('data/speeding_limit_{}.csv'.format(speed_limit), 'w') as f:
+            fieldnames = ['court', 'interstate', 'primary', 'secondary']
+            fieldnames.extend([str(i) for i in range(1, 22)])
+            writer = csv.DictWriter(f, fieldnames=fieldnames, lineterminator='\n')
+            writer.writeheader()
+            for court in traffic_by_court:
+                speeding_data = court['limits'][speed_limit]
+                speeding_data['court'] = court['localityNames']
+                speeding_data['interstate'] = court['interstate']
+                speeding_data['primary'] = court['primary']
+                speeding_data['secondary'] = court['secondary']
+                writer.writerow(speeding_data)
 
     # Generate the charts
     plt.figure(figsize=(10, 30))
@@ -192,7 +207,7 @@ def load_traffic_data():
                     'interstate': 0,
                     'primary': 0,
                     'secondary': 0,
-                    'limits': {},
+                    'limits': {limit: {str(i): 0 for i in range(1, 22)} for limit in SPEED_LIMITS},
                     'excessSpeeds': [],
                     'chargeCount': 0
                 }
@@ -226,15 +241,31 @@ def load_court_cases(path, traffic_by_court):
                     violation_parts = re.split('/|\\|-| ', violation)
                     speed_actual = int(violation_parts[0])
                     speed_limit = int(violation_parts[1])
+                    if speed_actual < speed_limit:
+                        speed_actual = int(violation_parts[1])
+                        speed_limit = int(violation_parts[0])
                 except ValueError:
                     print violation, row['Charge'], row['CodeSection']
                     continue
                 for court in traffic_by_court:
                     if int(row['fips']) in court['fips']:
-                        if speed_limit not in court['limits']:
-                            court['limits'][speed_limit] = []
-                        court['limits'][speed_limit].append(speed_actual)
-                        court['excessSpeeds'].append(speed_actual - speed_limit)
+                        miles_over = speed_actual - speed_limit
+
+                        speed_limit_bucket = SPEED_LIMITS[-1]
+                        for limit in SPEED_LIMITS:
+                            if speed_limit <= int(limit):
+                                speed_limit_bucket = limit
+                                break
+
+                        try:
+                            if miles_over > 20:
+                                court['limits'][speed_limit_bucket]['21'] += 1
+                            else:
+                                court['limits'][speed_limit_bucket][str(miles_over)] += 1
+                        except KeyError:
+                            print 'ERROR:', row['Charge'], miles_over
+                            #pass
+                        court['excessSpeeds'].append(miles_over)
                         court['chargeCount'] += 1
                         break
             print count_regex, count_speed
@@ -250,6 +281,9 @@ def get_speeding_violation(charge, code_section):
 
     if not match and not speeding:
         # No regex match
+        return None
+
+    if 'FTA' in charge or 'FAIL TO' in charge or 'APPEAR' in charge:
         return None
 
     if all([c_s not in code_section for c_s in SPEEDING_CODE_SECTIONS]):
